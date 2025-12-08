@@ -1,0 +1,61 @@
+/* cscan_disk.c */
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+int cmp(const void *a, const void *b) { return (*(int*)a - *(int*)b); }
+
+int main(){
+    int n, head, disk_size;
+    printf("Number of requests: "); scanf("%d",&n);
+    int req[n];
+    for(int i=0;i<n;i++) scanf("%d",&req[i]);
+    printf("Initial head: "); scanf("%d",&head);
+    printf("Disk size (max cylinder index): "); scanf("%d",&disk_size);
+    printf("Direction (1 = up/increasing, 0 = down): "); int dir; scanf("%d",&dir);
+
+    int left[n], right[n], l=0, r=0;
+    for(int i=0;i<n;i++){
+        if(req[i] < head) left[l++] = req[i];
+        else right[r++] = req[i];
+    }
+    qsort(left, l, sizeof(int), cmp);
+    qsort(right, r, sizeof(int), cmp);
+
+    long total = 0;
+    int cur = head;
+
+    if(dir==1){
+        for(int i=0;i<r;i++){
+            total += abs(right[i]-cur); cur = right[i];
+            printf("Serviced %d (cumu %ld)\n", right[i], total);
+        }
+        // jump to start (no servicing)
+        if(l>0){
+            total += abs((disk_size-1) - cur); // to end
+            total += disk_size - 1; // jump from end to 0
+            cur = 0;
+            for(int i=0;i<l;i++){
+                total += abs(left[i]-cur); cur = left[i];
+                printf("Serviced %d (cumu %ld)\n", left[i], total);
+            }
+        }
+    } else {
+        // dir == down
+        for(int i=l-1;i>=0;i--){
+            total += abs(left[i]-cur); cur = left[i];
+            printf("Serviced %d (cumu %ld)\n", left[i], total);
+        }
+        if(r>0){
+            total += abs(cur - 0); // to start
+            total += disk_size - 1; // jump to end
+            cur = disk_size-1;
+            for(int i=r-1;i>=0;i--){
+                total += abs(right[i]-cur); cur = right[i];
+                printf("Serviced %d (cumu %ld)\n", right[i], total);
+            }
+        }
+    }
+    printf("Total seek distance: %ld\n", total);
+    return 0;
+}
