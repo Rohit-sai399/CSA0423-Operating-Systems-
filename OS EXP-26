@@ -1,0 +1,45 @@
+/* file_mgmt.c */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+int main() {
+    char cmd[16], a[128], b[128], buf[512];
+    while(1) {
+        printf("\nCommands: create <file>, delete <file>, rename <old> <new>, read <file>, write <file>\n");
+        printf("Enter command (or exit): ");
+        if(scanf("%15s", cmd)!=1) break;
+        if(strcmp(cmd,"exit")==0) break;
+
+        if(strcmp(cmd,"create")==0) {
+            scanf("%127s", a);
+            FILE *f = fopen(a, "w");
+            if(!f) perror("create"); else { printf("Created %s\n", a); fclose(f); }
+        } else if(strcmp(cmd,"delete")==0) {
+            scanf("%127s", a);
+            if(unlink(a)==0) printf("Deleted %s\n", a); else perror("delete");
+        } else if(strcmp(cmd,"rename")==0) {
+            scanf("%127s %127s", a, b);
+            if(rename(a,b)==0) printf("Renamed %s -> %s\n", a, b); else perror("rename");
+        } else if(strcmp(cmd,"read")==0) {
+            scanf("%127s", a);
+            FILE *f = fopen(a,"r");
+            if(!f) { perror("read"); continue;}
+            while(fgets(buf, sizeof(buf), f)) fputs(buf, stdout);
+            fclose(f);
+        } else if(strcmp(cmd,"write")==0) {
+            scanf("%127s", a);
+            getchar(); // eat newline
+            printf("Enter text (single line): ");
+            if(!fgets(buf, sizeof(buf), stdin)) buf[0]=0;
+            FILE *f = fopen(a,"a");
+            if(!f) { perror("write"); continue;}
+            fputs(buf, f); fclose(f);
+            printf("Appended to %s\n", a);
+        } else {
+            printf("Unknown command\n");
+        }
+    }
+    return 0;
+}
