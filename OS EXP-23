@@ -1,0 +1,35 @@
+/* first_fit.c */
+#include <stdio.h>
+
+int main() {
+    int m,n;
+    printf("Number of memory blocks: "); scanf("%d",&m);
+    int block[m];
+    printf("Enter block sizes:\n");
+    for(int i=0;i<m;i++) scanf("%d",&block[i]);
+
+    printf("Number of processes: "); scanf("%d",&n);
+    int proc[n];
+    printf("Enter process sizes:\n");
+    for(int i=0;i<n;i++) scanf("%d",&proc[i]);
+
+    int alloc[n];
+    for(int i=0;i<n;i++) alloc[i] = -1;
+
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++){
+            if(block[j] >= proc[i]){
+                alloc[i] = j;
+                block[j] -= proc[i];
+                break;
+            }
+        }
+    }
+
+    printf("\nProcess\tSize\tBlock\n");
+    for(int i=0;i<n;i++){
+        printf("%d\t%d\t", i+1, proc[i]);
+        if(alloc[i] != -1) printf("%d\n", alloc[i]+1); else printf("Not Allocated\n");
+    }
+    return 0;
+}
