@@ -1,0 +1,23 @@
+/* fcfs_disk.c */
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main(){
+    int n, head;
+    printf("Number of requests: "); scanf("%d",&n);
+    int req[n];
+    printf("Enter requests (cylinder numbers):\n");
+    for(int i=0;i<n;i++) scanf("%d",&req[i]);
+    printf("Initial head position: "); scanf("%d",&head);
+
+    long total = 0;
+    int cur = head;
+    for(int i=0;i<n;i++){
+        total += abs(req[i] - cur);
+        cur = req[i];
+        printf("Moved to %d (cumulative %ld)\n", req[i], total);
+    }
+    printf("Total seek distance = %ld\n", total);
+    return 0;
+}
