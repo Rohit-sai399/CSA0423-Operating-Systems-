@@ -1,0 +1,37 @@
+/* indexed_alloc.c */
+#include <stdio.h>
+#include <stdlib.h>
+
+#define DISK_SIZE 1000
+
+int main(){
+    int disk[DISK_SIZE] = {0};
+    int numFiles;
+    printf("Number of files: "); scanf("%d",&numFiles);
+
+    for(int f=0; f<numFiles; f++){
+        int blocksNeeded;
+        printf("File %d blocks needed: ", f+1); scanf("%d",&blocksNeeded);
+        int indexBlock = -1;
+        // find free block for index
+        for(int i=0;i<DISK_SIZE;i++) if(!disk[i]){ indexBlock = i; break; }
+        if(indexBlock==-1){ printf("No space for index block for file %d\n", f+1); continue; }
+        disk[indexBlock]=1;
+        int *pointers = malloc(blocksNeeded * sizeof(int));
+        int allocated=0;
+        for(int i=0;i<DISK_SIZE && allocated<blocksNeeded;i++){
+            if(!disk[i] && i!=indexBlock){ disk[i]=1; pointers[allocated++]=i; }
+        }
+        if(allocated < blocksNeeded) {
+            printf("Not enough space for file %d; freeing allocated\n", f+1);
+            disk[indexBlock]=0;
+            for(int i=0;i<allocated;i++) disk[pointers[i]]=0;
+        } else {
+            printf("File %d: index block %d -> data blocks:", f+1, indexBlock);
+            for(int i=0;i<blocksNeeded;i++) printf(" %d", pointers[i]);
+            printf("\n");
+        }
+        free(pointers);
+    }
+    return 0;
+}
