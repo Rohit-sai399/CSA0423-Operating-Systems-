@@ -1,0 +1,63 @@
+/* scan_disk.c */
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main(){
+    int n, head, disk_size;
+    printf("Number of requests: "); scanf("%d",&n);
+    int req[n];
+    printf("Enter requests:\n");
+    for(int i=0;i<n;i++) scanf("%d",&req[i]);
+    printf("Initial head pos: "); scanf("%d",&head);
+    printf("Disk size (max cylinder index): "); scanf("%d",&disk_size);
+    printf("Direction (1 = up/increasing, 0 = down/decreasing): ");
+    int dir; scanf("%d",&dir);
+
+    // split requests
+    int left[n], right[n], l=0, r=0;
+    for(int i=0;i<n;i++){
+        if(req[i] < head) left[l++] = req[i];
+        else right[r++] = req[i];
+    }
+    // sort left descending, right ascending
+    qsort(left, l, sizeof(int), (__compar_fn_t) (int(*)(const void*, const void*)) (int(*)(const int*, const int*)) ( (int(*)(const void*, const void*)) ( (int(*)(const void*, const void*)) ( (int (*)(const void*, const void*)) (NULL) ) ) );
+    // simpler: use built-in comparator
+    int cmp(const void*a,const void*b){ return (*(int*)a - *(int*)b); }
+
+    qsort(left, l, sizeof(int), cmp);
+    qsort(right, r, sizeof(int), cmp);
+
+    long total = 0;
+    int cur = head;
+
+    if(dir==1){
+        // service right ascending
+        for(int i=0;i<r;i++){
+            total += abs(right[i]-cur); cur = right[i];
+            printf("Serviced %d (cumu %ld)\n", right[i], total);
+        }
+        // go to end
+        total += abs(disk_size-1 - cur);
+        cur = disk_size-1;
+        // service left in descending order
+        for(int i=l-1;i>=0;i--){
+            total += abs(left[i]-cur); cur = left[i];
+            printf("Serviced %d (cumu %ld)\n", left[i], total);
+        }
+    } else {
+        // service left descending
+        for(int i=l-1;i>=0;i--){
+            total += abs(left[i]-cur); cur = left[i];
+            printf("Serviced %d (cumu %ld)\n", left[i], total);
+        }
+        total += abs(0 - cur);
+        cur = 0;
+        for(int i=0;i<r;i++){
+            total += abs(right[i]-cur); cur = right[i];
+            printf("Serviced %d (cumu %ld)\n", right[i], total);
+        }
+    }
+    printf("Total seek distance: %ld\n", total);
+    return 0;
+}
