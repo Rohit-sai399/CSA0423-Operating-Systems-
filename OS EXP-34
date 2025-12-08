@@ -1,0 +1,28 @@
+/* contiguous_alloc.c */
+#include <stdio.h>
+#include <string.h>
+
+#define DISK_SIZE 1000
+
+int main(){
+    int disk[DISK_SIZE] = {0}; // 0 free, 1 used
+    int m;
+    printf("Number of files to allocate: "); scanf("%d",&m);
+    for(int i=0;i<m;i++){
+        int size;
+        printf("File %d size (records): ", i+1); scanf("%d",&size);
+        // find contiguous stretch
+        int found = -1;
+        for(int start=0; start<=DISK_SIZE-size; start++){
+            int ok = 1;
+            for(int k=0;k<size;k++) if(disk[start+k]) { ok=0; break; }
+            if(ok){ found = start; break; }
+        }
+        if(found==-1) printf("File %d: Not enough contiguous space\n", i+1);
+        else {
+            for(int k=0;k<size;k++) disk[found+k]=1;
+            printf("File %d allocated at block %d to %d\n", i+1, found, found+size-1);
+        }
+    }
+    return 0;
+}
