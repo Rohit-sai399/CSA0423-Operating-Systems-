@@ -1,0 +1,30 @@
+/* unix_syscalls_demo.c */
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
+
+int main() {
+    const char *fname = "demo_unix.txt";
+    int fd = creat(fname, 0644); // create or truncate
+    if(fd < 0) { perror("creat"); return 1; }
+    const char *text = "Hello from unix syscalls!\n";
+    if(write(fd, text, strlen(text)) < 0) { perror("write"); close(fd); return 1; }
+    close(fd);
+
+    fd = open(fname, O_RDONLY);
+    if(fd < 0) { perror("open"); return 1; }
+    char buf[128];
+    ssize_t r = read(fd, buf, sizeof(buf)-1);
+    if(r < 0) { perror("read"); close(fd); return 1; }
+    buf[r] = '\0';
+    printf("Read content:\n%s", buf);
+    close(fd);
+
+    // unlink (delete) file
+    if(unlink(fname) == 0) printf("File '%s' deleted.\n", fname);
+    else perror("unlink");
+
+    return 0;
+}
