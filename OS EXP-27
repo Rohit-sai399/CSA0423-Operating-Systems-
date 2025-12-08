@@ -1,0 +1,50 @@
+/* myls.c */
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
+
+void print_permissions(mode_t m) {
+    char s[11] = "----------";
+    if(S_ISDIR(m)) s[0] = 'd';
+    if(m & S_IRUSR) s[1]='r';
+    if(m & S_IWUSR) s[2]='w';
+    if(m & S_IXUSR) s[3]='x';
+    if(m & S_IRGRP) s[4]='r';
+    if(m & S_IWGRP) s[5]='w';
+    if(m & S_IXGRP) s[6]='x';
+    if(m & S_IROTH) s[7]='r';
+    if(m & S_IWOTH) s[8]='w';
+    if(m & S_IXOTH) s[9]='x';
+    printf("%s ", s);
+}
+
+int main(int argc, char *argv[]) {
+    int longfmt = 0;
+    if(argc>1 && strcmp(argv[1], "-l")==0) longfmt = 1;
+    DIR *d = opendir(".");
+    if(!d){ perror("opendir"); return 1; }
+    struct dirent *e;
+    while((e = readdir(d)) != NULL) {
+        if(!longfmt) { printf("%s  ", e->d_name); continue; }
+        struct stat st;
+        if(stat(e->d_name, &st)==0){
+            print_permissions(st.st_mode);
+            printf("%2ld ", (long)st.st_nlink);
+            struct passwd *pw = getpwuid(st.st_uid);
+            struct group  *gr = getgrgid(st.st_gid);
+            printf("%s %s ", pw?pw->pw_name:"?", gr?gr->gr_name:"?");
+            printf("%6lld ", (long long)st.st_size);
+            char tbuf[64];
+            strftime(tbuf,sizeof(tbuf), "%b %d %H:%M", localtime(&st.st_mtime));
+            printf("%s %s\n", tbuf, e->d_name);
+        } else {
+            printf("???????? %s\n", e->d_name);
+        }
+    }
+    if(!longfmt) printf("\n");
+    closedir(d);
+    return 0;
+}
