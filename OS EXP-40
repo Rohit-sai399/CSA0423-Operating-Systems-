@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+
+void print_permissions(mode_t mode) {
+    printf("File Type: ");
+    if (S_ISREG(mode)) printf("Regular File\n");
+    else if (S_ISDIR(mode)) printf("Directory\n");
+    else if (S_ISLNK(mode)) printf("Symbolic Link\n");
+    else printf("Other Type\n");
+
+    printf("Permissions:\n");
+
+    printf("Owner:  ");
+    printf((mode & S_IRUSR) ? "read " : "");
+    printf((mode & S_IWUSR) ? "write " : "");
+    printf((mode & S_IXUSR) ? "execute " : "");
+    printf("\n");
+
+    printf("Group:  ");
+    printf((mode & S_IRGRP) ? "read " : "");
+    printf((mode & S_IWGRP) ? "write " : "");
+    printf((mode & S_IXGRP) ? "execute " : "");
+    printf("\n");
+
+    printf("Others: ");
+    printf((mode & S_IROTH) ? "read " : "");
+    printf((mode & S_IWOTH) ? "write " : "");
+    printf((mode & S_IXOTH) ? "execute " : "");
+    printf("\n");
+}
+
+int main(int argc, char *argv[]) {
+    struct stat fileStat;
+
+    if (argc < 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        exit(1);
+    }
+
+    if (stat(argv[1], &fileStat) < 0) {
+        printf("Error reading file info.\n");
+        exit(1);
+    }
+
+    printf("******* Linux File Permission Demo *******\n");
+    printf("File: %s\n\n", argv[1]);
+    print_permissions(fileStat.st_mode);
+
+    return 0;
+}
