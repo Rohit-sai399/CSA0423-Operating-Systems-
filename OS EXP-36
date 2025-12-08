@@ -1,0 +1,39 @@
+/* linked_alloc.c */
+#include <stdio.h>
+#include <stdlib.h>
+
+#define DISK_SIZE 1000
+
+int main(){
+    int disk[DISK_SIZE] = {0};
+    int next[DISK_SIZE];
+    for(int i=0;i<DISK_SIZE;i++) next[i] = -1;
+
+    int n;
+    printf("Number of files: "); scanf("%d",&n);
+    for(int f=0; f<n; f++){
+        int blocks;
+        printf("File %d blocks required: ", f+1); scanf("%d",&blocks);
+        int head=-1, tail=-1, allocated=0;
+        for(int i=0;i<DISK_SIZE && allocated<blocks;i++){
+            if(!disk[i]){
+                disk[i]=1;
+                if(head==-1) head = i;
+                if(tail!=-1) next[tail] = i;
+                tail = i;
+                allocated++;
+            }
+        }
+        if(allocated<blocks){
+            printf("Not enough space for file %d. Rolling back.\n", f+1);
+            int cur = head;
+            while(cur!=-1){ disk[cur]=0; int tmp = next[cur]; next[cur]=-1; cur=tmp; }
+        } else {
+            printf("File %d allocated. Head=%d Tail=%d. Chain: ", f+1, head, tail);
+            int cur = head;
+            while(cur!=-1){ printf("%d ", cur); cur = next[cur]; }
+            printf("\n");
+        }
+    }
+    return 0;
+}
