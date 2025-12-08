@@ -1,0 +1,48 @@
+/* lru_paging.c */
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+int main(){
+    int frames, n;
+    printf("Number of frames: "); scanf("%d",&frames);
+    printf("Length of reference string: "); scanf("%d",&n);
+    int ref[n];
+    printf("Enter reference string:\n");
+    for(int i=0;i<n;i++) scanf("%d",&ref[i]);
+
+    int *frame = malloc(frames*sizeof(int));
+    int *last = malloc(frames*sizeof(int));
+    for(int i=0;i<frames;i++){ frame[i]=-1; last[i]=-1; }
+    int faults=0;
+
+    for(int t=0;t<n;t++){
+        int page = ref[t];
+        int found = -1;
+        for(int j=0;j<frames;j++) if(frame[j]==page) { found=j; break; }
+        if(found!=-1){
+            last[found] = t;
+        } else {
+            // find empty
+            int empty = -1;
+            for(int j=0;j<frames;j++) if(frame[j]==-1){ empty=j; break; }
+            if(empty!=-1){
+                frame[empty] = page;
+                last[empty] = t;
+            } else {
+                // find LRU
+                int lru = 0;
+                for(int j=1;j<frames;j++) if(last[j] < last[lru]) lru = j;
+                frame[lru] = page;
+                last[lru] = t;
+            }
+            faults++;
+        }
+        printf("Step %d: ", t+1);
+        for(int j=0;j<frames;j++) printf("%d ", frame[j]);
+        printf("\n");
+    }
+    printf("Total faults: %d\n", faults);
+    free(frame); free(last);
+    return 0;
+}
